@@ -9,12 +9,7 @@ using CsvHelper;
 
 namespace FileProcessing
 {
-    //public enum MyInputFileHeaders
-    //{Konto,
-    //Belopp,
-    //Datum,
-    //Bank
-    //}
+ 
     public static class ConsoleWrite
     {
         public static void Success(string input)
@@ -47,13 +42,15 @@ namespace FileProcessing
             var menuString =
                 $@"
 1. Ange referensdatum
-2. Ange Sökväg till filen som ska läsas in
-3. Ange filnamnet på filen som ska läsas in
+2. Ange sökväg och filnamn på filen som ska läsas in
+
 ";
             var menuString2 =
                 $@"   
-4. Generera bankfiler
-5. Kolla input
+3. Generera bankfiler
+4. Kolla inputfilen
+5. Kolla output
+
 
 6. EXIT
 ";
@@ -105,16 +102,16 @@ class Program
                         AngeRefdatum();
                         break;
                     case '2':
-                        AngeFilePath();
+                        Angefilepath();
                         break;
                     case '3':
-                        AngeFileName();
-                        break;
-                    case '4':
                         Genererafiler();
                         break;
+                    case '4':
+                        KollaInput();
+                        break;
                     case '5':
-                        Kolla Input();
+                        KollaOutput();
                         break;
                     case '6':
                         return;
@@ -137,7 +134,16 @@ ANGE REFERENSDATUM   Enter EXIT to Abort.
 Referensdatum(YYYY-MM-DD):
 ";
                 Console.WriteLine(menuString);
-                if (Abort(input = Console.ReadLine())) { Console.Clear(); return; }
+                input = Console.ReadLine();
+                if (input == "")
+                {
+                    Console.WriteLine(@" default referensdatum används 2014-05-29");
+                    input = "2014-05-29";
+                }
+
+                if (Abort(input = Console.ReadLine()))
+                { Console.Clear();
+                    return; }
 
                 try
                 {
@@ -154,27 +160,45 @@ Referensdatum(YYYY-MM-DD):
             Console.Clear();
 
 
-            ConsoleWrite.Success("Referens datum angivet: " + referensdatum.ToShortDateString());
+            ConsoleWrite.Success("Referens datum angivet till: " + referensdatum.ToShortDateString());
         }
 
 
     private void Angefilepath()
     {
-        var flag = true;
-        var input = "";
-        while (flag)
+
+
+        bool flag = true;
+        string input1 = "";
+        string input2 = "";
+
+
+            while (flag)
         {
             var menuString = $@"
-ANGE SÖKVÄG   Enter EXIT to Abort.
+ANGE SÖKVÄG och filenamn  Enter EXIT to Abort.
 
-Ange sökväg till filen som ska läsas in:
+Ange först sökväg till filen som ska läsas in, ex C:\Fileprocessing\data\
 ";
             Console.WriteLine(menuString);
-            if (Abort(input = Console.ReadLine())) { Console.Clear(); return; }
-
-            try
+            input1 = Console.ReadLine();
+            if (input1 == "")
             {
-                filepath=input;
+                Console.WriteLine(@" default sökvägen används C:\Fileprocessing\data");
+                input1 = @"C:\Fileprocessing\data\";
+            }
+            if (Abort(input1))
+                { Console.Clear();
+                    return;
+                }
+
+            Console.WriteLine("Ange filnamn exempel: in.txt");
+            filepath = input2;
+
+
+                try
+            {
+                
                         
                 flag = false;
             }
@@ -256,10 +280,10 @@ Ange sökväg till filen som ska läsas in:
                     {
                         csv.Configuration.Delimiter = ";";
 
-                        for (var i = 0; i < 4; i++)
-                        {
 
-                            csv.WriteField(arrayHeader[i]);
+                        foreach (string t in arrayHeader)
+                        {
+                            csv.WriteField(t);
                         }
                         csv.NextRecord();
                         foreach (var trans in translista.Where(x => x.Bank == bank.Key))
