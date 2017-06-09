@@ -1,4 +1,5 @@
 ﻿using System;
+using System.CodeDom;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -171,7 +172,7 @@ Referensdatum(YYYY-MM-DD):
         bool flag = true;
         string input1 = "";
         string input2 = "";
-
+        string _filepath = "";
 
             while (flag)
         {
@@ -196,11 +197,23 @@ Ange först sökväg till filen som ska läsas in, ex C:\Fileprocessing\data\
             filepath = input2;
 
 
+            
+
                 try
-            {
-                
+                {
+
+                    _filepath = input1 + input2;
+
+                    if (FileOrDirectoryExists(_filepath))
+                    {
+                        flag = false;
+                    }
+                    else
+                    {
+                        ConsoleWrite.Error("Filnamnet och Sökvägen stämmer ej " +_filepath);
+                    }
                         
-                flag = false;
+                
             }
             catch (Exception ex)
             {
@@ -212,7 +225,7 @@ Ange först sökväg till filen som ska läsas in, ex C:\Fileprocessing\data\
         Console.Clear();
 
 
-        ConsoleWrite.Success("Referens datum angivet: " + referensdatum.ToShortDateString());
+        ConsoleWrite.Success("Filnamnet och Sökvägen stämmer: " + _filepath);
     }
 
 
@@ -234,42 +247,67 @@ Ange först sökväg till filen som ska läsas in, ex C:\Fileprocessing\data\
             Console.WriteLine(menuString);
         }
 
-        static void Main(string[] args)
+    public class ReadInFile
+    {
+        private List<Transaction> translista = new List<Transaction>();
+
+        public string Readfile(string infil, DateTime refdatum)
+        {
+            string MessageResult = "OK";
+            try
+            {
+                using (var fileReader = File.OpenText(infil))
+                {
+
+
+                    using (var csv = new CsvHelper.CsvReader(fileReader))
+                    {
+                        csv.Configuration.Delimiter = ";";
+
+                        while (csv.Read())
+                        {
+
+                            var strKonto = csv.GetField<string>("Konto");
+                            var strBelopp = csv.GetField<string>("Belopp");
+                            var dtDatum = csv.GetField<DateTime>("Datum");
+                            var strBank = csv.GetField<string>("Bank");
+                            var trans = new Transaction(strBank, strKonto, dtDatum, strBelopp, refdatum);
+                            translista.Add(trans);
+                        }
+                    }
+                }
+
+            }
+            catch (IOException e)
+            {
+                MessageResult = "Ett fel förekom när filen skulle läsas in." + e.Message;
+            }
+
+            catch (Exception e)
+            {
+                MessageResult = e.Message;
+            }
+
+
+            return MessageResult;
+
+        }
+
+        public List<Transaction> GetListTransactions()
+        {
+            return translista;
+        }
+
+    }
+
+    static void Main(string[] args)
         {
 
 
-
-            var translista = new List<Transaction>();
-            DateTime RefDatum = new DateTime(2014, 05, 29);
-            string textFile = @"C:\Fileprocessing\data\in.txt";
             string outPath = @"C:\temp\";
-            using (var fileReader = File.OpenText(textFile))
-            {
-                using (var csv = new CsvHelper.CsvReader(fileReader))
-                {
-                    csv.Configuration.Delimiter = ";";
-
-                    while (csv.Read())
-                    {
-
-                        var strKonto = csv.GetField<string>("Konto");
-                        var strBelopp = csv.GetField<string>("Belopp");
-                        var dtDatum = csv.GetField<DateTime>("Datum");
-                        var strBank = csv.GetField<string>("Bank");
-
-                        
-
-                        var trans = new Transaction(strBank, strKonto, dtDatum, strBelopp, RefDatum);
-                        translista.Add(trans);
 
 
-
-                    }
-                }
-                fileReader.Close();
-            }
-
-            var banklista = translista.GroupBy(x => x.Bank).ToList();
+    var banklista = translista.GroupBy(x => x.Bank).ToList();
 
             string[] arrayHeader = new string[] {"Konto", "Belopp", "Datum", "Typ"};
             foreach (var bank in banklista)
