@@ -21,11 +21,7 @@ namespace FileProcessing
             {
                 translista = inlista;
                 outPath = outpath;
-                string str = char.ToString('/');
-
-                if (outPath.Substring(outPath.Length - 1) != str)
-                    outPath = outPath + char.ToString('/');
-
+              
                 var banklista = translista.GroupBy(x => x.Bank).ToList();
 
                 string[] arrayHeader = new string[] {"Konto", "Belopp", "Datum", "Typ"};
