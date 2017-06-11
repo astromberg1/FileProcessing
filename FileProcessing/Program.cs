@@ -10,85 +10,27 @@ using CsvHelper;
 
 namespace FileProcessing
 {
- 
-    public static class ConsoleWrite
+
+    
+    
+
+
+    class Program
     {
-        public static void Success(string input)
+        internal static bool FileOrDirectoryExists(string name)
         {
-            Console.BackgroundColor = ConsoleColor.Green;
-            Console.ForegroundColor = ConsoleColor.Black;
-            Console.WriteLine(input);
-            Console.BackgroundColor = ConsoleColor.Black;
-            Console.ForegroundColor = ConsoleColor.White;
-        }
-        public static void Error(string input)
-        {
-            Console.BackgroundColor = ConsoleColor.Red;
-            Console.ForegroundColor = ConsoleColor.Yellow;
-            Console.WriteLine(input);
-            Console.BackgroundColor = ConsoleColor.Black;
-            Console.ForegroundColor = ConsoleColor.White;
-        }
-        public static void Heading(string input)
-        {
-            Console.BackgroundColor = ConsoleColor.Gray;
-            Console.ForegroundColor = ConsoleColor.Black;
-            Console.WriteLine(input);
-            Console.BackgroundColor = ConsoleColor.Black;
-            Console.ForegroundColor = ConsoleColor.White;
+            return (Directory.Exists(name) || File.Exists(name));
         }
 
-        public static void MainMenu()
+        private static bool Abort(string input)
         {
-            var menuString =
-                $@"
-1. Ange referensdatum
-2. Ange sökväg och filnamn på filen som ska läsas in
-
-";
-            var menuString2 =
-                $@"   
-3. Generera bankfiler
-4. Kolla inputfilen
-5. Kolla output
-
-
-6. EXIT
-";
-            ConsoleWrite.Heading("START MENY");
-            Console.WriteLine(Environment.NewLine);
-            ConsoleWrite.Heading("Input sektion");
-            Console.WriteLine(menuString);
-            ConsoleWrite.Heading("Exekverings sektion");
-            Console.WriteLine(menuString2);
+            if (input.ToLower() == "exit")
+                return true;
+            else
+                return false;
         }
 
-        internal static void ErrorInput()
-        {
-            ConsoleWrite.Error("ERROR. fel input.");
-        }
-    }
-
-
-
-class Program
-{
-    private DateTime referensdatum;
-   private  string filepath;
-    private string filename;
-    internal static bool FileOrDirectoryExists(string name)
-    {
-        return (Directory.Exists(name) || File.Exists(name));
-    }
-
-        public bool Abort(string input)
-    {
-        if (input.ToLower() == "exit")
-            return true;
-        else
-            return false;
-    }
-        public void StartMenu()
+        public static void StartMenu()
         {
             while (true)
             {
@@ -103,18 +45,15 @@ class Program
                         AngeRefdatum();
                         break;
                     case '2':
-                        Angefilepath();
+                        AngeInfilepath();
                         break;
                     case '3':
-                        Genererafiler();
+                        AngeUtfilepath();
                         break;
                     case '4':
-                        KollaInput();
+                        Genererafiler();
                         break;
                     case '5':
-                        KollaOutput();
-                        break;
-                    case '6':
                         return;
                     default:
                         ErrorInput();
@@ -123,7 +62,7 @@ class Program
             }
         }
 
-        public void AngeRefdatum()
+        public static void AngeRefdatum()
         {
             var flag = true;
             var input = "";
@@ -140,15 +79,19 @@ Referensdatum(YYYY-MM-DD):
                 {
                     Console.WriteLine(@" default referensdatum används 2014-05-29");
                     input = "2014-05-29";
+                    Console.ReadLine();
                 }
-
-                if (Abort(input = Console.ReadLine()))
-                { Console.Clear();
-                    return; }
-
+                else
+                {
+                    if (Abort(input))
+                        Console.Clear();
+                    return;
+                }
+             
                 try
                 {
-                    referensdatum = DateTime.Parse(input);
+                    InitValues.Referensdatum = DateTime.Parse(input);
+                  
                     flag = false;
                 }
                 catch (Exception ex)
@@ -156,251 +99,190 @@ Referensdatum(YYYY-MM-DD):
                     Console.Clear();
                     ConsoleWrite.Error(ex.Message.ToString());
                 }
-                
+
             }
             Console.Clear();
-
-
-            ConsoleWrite.Success("Referens datum angivet till: " + referensdatum.ToShortDateString());
+            ConsoleWrite.Success("Referens datum angivet till: " + InitValues.Referensdatum.ToString("yyyy-MM-dd"));
         }
 
 
-    private void Angefilepath()
-    {
-
-
-        bool flag = true;
-        string input1 = "";
-        string input2 = "";
-        string _filepath = "";
+        private static void AngeInfilepath()
+        {
+            bool flag = true;
+            string input1 = "";
+            string input2 = "";
+            string _filepath = "";
 
             while (flag)
-        {
-            var menuString = $@"
+            {
+                var menuString = $@"
 ANGE SÖKVÄG och filenamn  Enter EXIT to Abort.
 
 Ange först sökväg till filen som ska läsas in, ex C:\Fileprocessing\data\
 ";
-            Console.WriteLine(menuString);
-            input1 = Console.ReadLine();
-            if (input1 == "")
-            {
-                Console.WriteLine(@" default sökvägen används C:\Fileprocessing\data");
-                input1 = @"C:\Fileprocessing\data\";
-            }
-            if (Abort(input1))
-                { Console.Clear();
+                Console.WriteLine(menuString);
+                input1 = Console.ReadLine();
+                if (input1 == "")
+                {
+                    Console.WriteLine(@" default sökvägen används C:\Fileprocessing\data\");
+                    input1 = @"C:\Fileprocessing\data\";
+                }
+
+                if (Abort(input1))
+                {
+                    Console.Clear();
                     return;
                 }
 
-            Console.WriteLine("Ange filnamn exempel: in.txt");
-            filepath = input2;
 
+                Console.WriteLine("Ange filnamn exempel: in.txt");
 
-            
+                input2 = Console.ReadLine();
+                if (input2 == "")
+                {
+                    Console.WriteLine(@" default filnamn används: in.txt");
+                    input2 = @"in.txt";
+                    Console.ReadLine();
+                }
+
 
                 try
                 {
-
                     _filepath = input1 + input2;
-
                     if (FileOrDirectoryExists(_filepath))
                     {
                         flag = false;
+                        InitValues.InfilSokvagOchNamn = _filepath;
                     }
                     else
                     {
-                        ConsoleWrite.Error("Filnamnet och Sökvägen stämmer ej " +_filepath);
+                        ConsoleWrite.Error("Filnamnet och Sökvägen stämmer ej " + _filepath);
                     }
-                        
-                
-            }
-            catch (Exception ex)
-            {
-                Console.Clear();
-                ConsoleWrite.Error(ex.Message.ToString());
-            }
 
+
+                }
+                catch (Exception ex)
+                {
+                    Console.Clear();
+                    ConsoleWrite.Error(ex.Message.ToString());
+                }
+
+            }
+            Console.Clear();
+
+
+            ConsoleWrite.Success("Filnamnet och Sökvägen stämmer: " + _filepath);
         }
-        Console.Clear();
+
+        private static void AngeUtfilepath()
+        {
+            bool flag = true;
+            string input1 = "";
+            string input2 = "";
+            string _filepath = "";
+
+            while (flag)
+            {
+                var menuString = $@"
+ANGE SÖKVÄG där resultat filerna ska hamna,  Enter EXIT to Abort.
+
+Ange sökvägen där resultatfilerna ska hamna, ex C:\temp\ut\
+";
+                Console.WriteLine(menuString);
+                input1 = Console.ReadLine();
+                if (input1 == "")
+                {
+                    Console.WriteLine(@" default sökvägen används C:\temp\ut\");
+                    input1 = @"C:\temp\ut\";
+                    Console.ReadLine();
+                }
+                if (Abort(input1))
+                {
+                    Console.Clear();
+                    return;
+                }
 
 
-        ConsoleWrite.Success("Filnamnet och Sökvägen stämmer: " + _filepath);
-    }
+
+                try
+                {
+                    _filepath = input1;
+                    if (FileOrDirectoryExists(_filepath))
+                    {
+                        flag = false;
+                        InitValues.UtfilSokVag = _filepath;
+                    }
+                    else
+                    {
+                        ConsoleWrite.Error("Sökvägen stämmer ej " + _filepath);
+                    }
+
+
+                }
+                catch (Exception ex)
+                {
+                    Console.Clear();
+                    ConsoleWrite.Error(ex.Message.ToString());
+                }
+
+            }
+            Console.Clear();
+
+
+            ConsoleWrite.Success("Sökvägen stämmer: " + _filepath);
+        }
+
+        private static void Genererafiler()
+        {
+
+
+            if (!InitValues.CheckAllaVardenSatta())
+            {
+                ConsoleWrite.Error("Alla input värden är inte satta, " +
+                                   InitValues.InfilSokvagOchNamn + " " +
+                                   InitValues.UtfilSokVag + " " +
+                                   InitValues.Referensdatum.ToString("yyyy-MM-dd"));
+            }
+            else
+            {
+                var readfileInstans = new ReadInFile();
+                var resultread = readfileInstans.Readfile(InitValues.InfilSokvagOchNamn, InitValues.Referensdatum);
+                if (resultread != "OK")
+                    ConsoleWrite.Error(resultread);
+                else
+                {
+                    var outfileInstans = new WriteFiles();
+                    var resultwrite =
+                        outfileInstans.WriteFile(InitValues.UtfilSokVag, readfileInstans.GetListTransactions());
+                    if (resultwrite != "OK")
+                        ConsoleWrite.Error(resultwrite);
+                    else
+                    {
+                        ConsoleWrite.Success("Allt klart filerna är skapade");
+                    }
+                }
+            }
+        }
 
 
 
-
-
-
-
-
-
-
-
-
-
-        private void ErrorInput()
+        private static void ErrorInput()
         {
             var menuString = $@"";
 
             Console.WriteLine(menuString);
         }
 
-    public class ReadInFile
-    {
-        private List<Transaction> translista = new List<Transaction>();
 
-        public string Readfile(string infil, DateTime refdatum)
+
+        static void Main(string[] args)
         {
-            string MessageResult = "OK";
-            try
-            {
-                using (var fileReader = File.OpenText(infil))
-                {
-
-
-                    using (var csv = new CsvHelper.CsvReader(fileReader))
-                    {
-                        csv.Configuration.Delimiter = ";";
-
-                        while (csv.Read())
-                        {
-
-                            var strKonto = csv.GetField<string>("Konto");
-                            var strBelopp = csv.GetField<string>("Belopp");
-                            var dtDatum = csv.GetField<DateTime>("Datum");
-                            var strBank = csv.GetField<string>("Bank");
-                            var trans = new Transaction(strBank, strKonto, dtDatum, strBelopp, refdatum);
-                            translista.Add(trans);
-                        }
-                    }
-                }
-
-            }
-            catch (IOException e)
-            {
-                MessageResult = "Ett fel förekom när filen skulle läsas in." + e.Message;
-            }
-
-            catch (Exception e)
-            {
-                MessageResult = e.Message;
-            }
-
-
-            return MessageResult;
-
-        }
-
-        public List<Transaction> GetListTransactions()
-        {
-            return translista;
-        }
-
-    }
-
-    static void Main(string[] args)
-        {
-
-
-            string outPath = @"C:\temp\";
-
-
-    var banklista = translista.GroupBy(x => x.Bank).ToList();
-
-            string[] arrayHeader = new string[] {"Konto", "Belopp", "Datum", "Typ"};
-            foreach (var bank in banklista)
-            {
-                using (var fileWriter = File.CreateText(outPath+bank.Key + ".txt"))
-                {
-                    using (var csv = new CsvHelper.CsvWriter(fileWriter))
-                    {
-                        csv.Configuration.Delimiter = ";";
-
-
-                        foreach (string t in arrayHeader)
-                        {
-                            csv.WriteField(t);
-                        }
-                        csv.NextRecord();
-                        foreach (var trans in translista.Where(x => x.Bank == bank.Key))
-                        {
-                            csv.WriteField(trans.Konto);
-                            csv.WriteField(trans.BeloppformatOn
-                                ? trans.Belopp.ToString("+#;-#;0")
-                                : trans.Belopp.ToString("0"));
-
-                            csv.WriteField(trans.Datum.ToString("yyyy-MM-dd"));
-                            csv.WriteField(trans.Typ);
-                            
-                            csv.NextRecord();
-                          
-                        }
-
-                        fileWriter.Close();
-                    }
-
-
-
-                }
-
-
-
-
-            }
-        }
-
-        public class Transaction
-        {
-            public string Bank { get; set; }
-
-            public string Konto { get; set; }
-
-            public DateTime Datum { get; set; }
-
-            public Decimal Belopp { get; set; }
-
-            public string Typ { get; set; }
-            public DateTime Refdatum { get; set; }
-
-            public bool BeloppformatOn { get; set; }
-            public Transaction(string bank, string konto, DateTime datum, string belopp, DateTime refdatum)
-            {
-                this.Bank = bank;
-                this.Konto = konto;
-                this.Datum = datum;
-                this.Belopp = decimal.Parse(belopp);
-                if ((belopp.IndexOf('-') > -1) || (belopp.IndexOf('+') > -1))
-                {
-                    BeloppformatOn = true;
-                }
-                else
-                {
-                    BeloppformatOn = false;
-                }
-
-                this.Refdatum = refdatum;
-
-                if (refdatum == datum)
-                    this.Typ = "ACTIVE";
-                else if (refdatum > datum)
-                    this.Typ = "OLD";
-                else
-                    this.Typ = "FUTURE";
-
-
-            }
-
-
-
-
-
-
-
-        }
+            StartMenu();
 
         }
 
     }
+}
+      
+    
 

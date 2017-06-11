@@ -45,6 +45,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ConsoleWrite.cs" />
+    <Compile Include="InitValues.cs" />
+    <Compile Include="ReadInFile.cs" />
+    <Compile Include="WriteFiles.cs" />
+    <Compile Include="Transaction.cs" />
+    <Compile Include="ImportFileFormatException.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
