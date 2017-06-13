@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using NUnit.Framework;
 using NUnit.Framework.Internal;
 
-namespace FileProcessing.Tests
+namespace FileProcess.Tests
 {
     [TestFixture]
     public class FileProcessingTests

@@ -47,9 +47,9 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\FileProcessing\FileProcessing.csproj">
+    <ProjectReference Include="..\FileProcessing\FileProcess.csproj">
       <Project>{6685e0be-0285-4f82-b411-c3a08efe8b26}</Project>
-      <Name>FileProcessing</Name>
+      <Name>FileProcess</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
